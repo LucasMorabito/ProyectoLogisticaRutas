@@ -1,0 +1,32 @@
+[Wed May 13 17:55:59 2026
+] Ruta: Mercedes -> Goya | Distancia: 146 km
+[Wed May 13 17:59:45 2026
+] Ruta: Goya -> Mercedes -> Sauce | Distancia: 307 km
+[Wed May 13 18:00:01 2026
+] Ruta: Mercedes -> Sauce | Distancia: 161 km
+[Wed May 13 18:00:06 2026
+] Ruta: Mercedes -> Sauce | Distancia: 161 km
+[Wed May 13 18:00:12 2026
+] Ruta: Corrientes -> Goya | Distancia: 225 km
+[Wed May 13 18:00:16 2026
+] Ruta: Corrientes -> Mercedes -> Sauce | Distancia: 406 km
+[Wed May 13 19:05:14 2026
+] Ruta: Corrientes -> Mercedes | Distancia: 245 km
+[Wed May 13 19:05:39 2026
+] Ruta: Mercedes | Distancia: 0 km
+[Wed May 13 19:05:44 2026
+] Ruta: Corrientes -> Mercedes | Distancia: 245 km
+[Wed May 13 19:05:57 2026
+] Ruta: Corrientes -> Mercedes | Distancia: 245 km
+[Wed May 13 19:06:12 2026
+] Ruta: Corrientes -> Mercedes | Distancia: 245 km
+[Wed May 13 19:06:15 2026
+] Ruta: Corrientes -> Mercedes | Distancia: 245 km
+[Wed May 13 19:06:18 2026
+] Ruta: Mercedes -> Corrientes | Distancia: 245 km
+[Wed May 13 21:02:50 2026
+] Ruta: Corrientes -> Paso_Libres -> Sauce | Distancia: 637 km
+[Wed May 13 21:02:58 2026
+] Ruta: Mercedes -> Goya | Distancia: 146 km
+[Wed May 13 21:03:04 2026
+] Ruta: Sauce -> Paso_Libres -> Goya | Distancia: 595 km
