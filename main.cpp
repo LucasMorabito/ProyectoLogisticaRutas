@@ -174,8 +174,10 @@ public:
         int n = getCantidad();
         f << n << endl;
 
-        for (auto& c : ciudades)
+        for (int i = 0; i < ciudades.size(); i++) {
+            Ciudad& c = ciudades[i];
             f << c.getId() << " " << c.getNombre() << " " << c.getX() << " " << c.getY() << endl;
+        }
 
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++)
@@ -224,8 +226,9 @@ public:
     void guardarHistorial(const string& caminoStr, int distancia) {
         time_t ahora = time(0);
         string fechaStr = ctime(&ahora);
-        if (!fechaStr.empty() && fechaStr.back() == '\n')
+        if (!fechaStr.empty() && fechaStr.back() == '\n') {
             fechaStr.pop_back();
+        }
 
         ofstream hist("historial.txt", ios::app);
         hist << "[" << fechaStr << "] " << caminoStr << " | " << distancia << " km" << endl;
@@ -244,15 +247,18 @@ public:
         for (int i = 0; i < n - 1; i++) {
             int minDist = INF, u = -1;
 
-            for (int j = 0; j < n; j++)
+            // encuentra nodo no visitado con menor distancia
+            for (int j = 0; j < n; j++) {
                 if (!visitado[j] && dist[j] <= minDist) {
                     minDist = dist[j];
                     u = j;
                 }
-
+            }
+            
             if (u == -1) break;
             visitado[u] = true;
 
+            // conexiones desde u
             for (int v = 0; v < n; v++) {
                 int peso = matriz[u][v].getMejorDistancia();
                 if (!visitado[v] && peso != INF && dist[u] + peso < dist[v]) {
@@ -267,10 +273,16 @@ public:
             return;
         }
 
+        // reconstruye camino desde destino a origen
         vector<int> camino;
-        for (int v = destino; v != -1; v = previo[v])
-            camino.push_back(v);
 
+        int v = destino;
+        while (v != -1) {
+            camino.push_back(v);
+            v = previo[v];
+        }
+
+        // formatea camino para mostrarlo
         string caminoStr = "";
         for (int i = camino.size() - 1; i >= 0; i--) {
             caminoStr += ciudades[camino[i]].getNombre();
@@ -292,7 +304,7 @@ int main() {
 
     Grafo g(0);
 
-    // g.agregarCiudad("Corrientes",  10, 10);
+    // g.agregarCiudad("Corrientes",  10,  10);
     // g.agregarCiudad("Goya",        20, 50);
     // g.agregarCiudad("Mercedes",    50, 30);
 
