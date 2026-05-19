@@ -5,7 +5,9 @@
 
 using namespace std;
 
+
 const int INF = 999999;
+
 
 class Ciudad {
 private:
@@ -36,53 +38,11 @@ public:
     }
 };
 
-class Conexion {
-private:
-    int distNacional;
-    int distProvincial;
-    int distRural;
-
-public:
-    Conexion(int n = INF, int p = INF, int r = INF) {
-        distNacional   = n;
-        distProvincial = p;
-        distRural      = r;
-    }
-
-    int getDistNacional()   const { return distNacional; }
-    int getDistProvincial() const { return distProvincial; }
-    int getDistRural()      const { return distRural; }
-
-    void setDistNacional(int d)   { distNacional   = d; }
-    void setDistProvincial(int d) { distProvincial = d; }
-    void setDistRural(int d)      { distRural      = d; }
-
-    int getMejorDistancia() const {
-        int mejor = INF;
-        if (distNacional   < mejor) mejor = distNacional;
-        if (distProvincial < mejor) mejor = distProvincial;
-        if (distRural      < mejor) mejor = distRural;
-        return mejor;
-    }
-
-    string getMejorTipo() const {
-        if (distNacional == INF && distProvincial == INF && distRural == INF)
-            return "Ninguna";
-
-        if (distNacional <= distProvincial && distNacional <= distRural)
-            return "Nacional";
-
-        if (distProvincial <= distNacional && distProvincial <= distRural)
-            return "Provincial";
-
-        return "Rural";
-    }
-};
 
 class Grafo {
 private:
-    vector<Ciudad>            ciudades;
-    vector<vector<Conexion>>  matriz;
+    vector<Ciudad> ciudades;
+    vector<vector<int>> matriz;
 
 public:
     Grafo(int n = 0) {
@@ -90,9 +50,10 @@ public:
     }
 
     void inicializar(int n) {
-        matriz.assign(n, vector<Conexion>(n));
-        for (int i = 0; i < n; i++)
-            matriz[i][i] = Conexion(0, 0, 0);
+        matriz.assign(n, vector<int>(n, INF));
+        for (int i = 0; i < n; i++) {
+            matriz[i][i] = 0;
+        }
     }
 
     int getCantidad() const { return ciudades.size(); }
@@ -104,44 +65,24 @@ public:
         int n = getCantidad();
 
         for (int i = 0; i < n - 1; i++) {
-            matriz[i].push_back(Conexion());
+            matriz[i].push_back(INF);
         }
 
-        vector<Conexion> nuevaFila(n);
-        nuevaFila[n - 1] = Conexion(0, 0, 0);
+        vector<int> nuevaFila(n, INF);
+        nuevaFila[n - 1] = 0;
         matriz.push_back(nuevaFila);
 
         cout << "Ciudad '" << nombre << "' agregada con ID " << nuevoId << "\n";
     }
 
-    void agregarConexion(int i, int j, int distancia, string tipo) {
-        if (tipo == "Nacional") {
-            matriz[i][j].setDistNacional(distancia);
-            matriz[j][i].setDistNacional(distancia);
-        } else if (tipo == "Provincial") {
-            matriz[i][j].setDistProvincial(distancia);
-            matriz[j][i].setDistProvincial(distancia);
-        } else if (tipo == "Rural") {
-            matriz[i][j].setDistRural(distancia);
-            matriz[j][i].setDistRural(distancia);
-        } else {
-            cout << "Tipo invalido. Use Nacional, Provincial o Rural.\n";
-        }
+    void agregarConexion(int i, int j, int distancia) {
+        matriz[i][j] = distancia;
+        matriz[j][i] = distancia;
     }
 
-    void cortarRuta(int i, int j, string tipo) {
-        if (tipo == "Nacional") {
-            matriz[i][j].setDistNacional(INF);
-            matriz[j][i].setDistNacional(INF);
-        } else if (tipo == "Provincial") {
-            matriz[i][j].setDistProvincial(INF);
-            matriz[j][i].setDistProvincial(INF);
-        } else if (tipo == "Rural") {
-            matriz[i][j].setDistRural(INF);
-            matriz[j][i].setDistRural(INF);
-        } else {
-            cout << "Tipo invalido. Use Nacional, Provincial o Rural.\n";
-        }
+    void cortarRuta(int i, int j) {
+        matriz[i][j] = INF;
+        matriz[j][i] = INF;
     }
 
     void mostrarCiudades() {
@@ -151,14 +92,13 @@ public:
     }
 
     void mostrarMatriz() {
-        cout << "\n--- MATRIZ (mejor distancia) ---\n";
+        cout << "\n--- MATRIZ ---\n";
         for (int i = 0; i < getCantidad(); i++) {
             for (int j = 0; j < getCantidad(); j++) {
-                int d = matriz[i][j].getMejorDistancia();
-                if (d == INF)
+                if (matriz[i][j] == INF)
                     cout << "INF\t";
                 else
-                    cout << d << "\t";
+                    cout << matriz[i][j] << "\t";
             }
             cout << endl;
         }
@@ -180,10 +120,9 @@ public:
         }
 
         for (int i = 0; i < n; i++) {
-            for (int j = 0; j < n; j++)
-                f << matriz[i][j].getDistNacional()   << " "
-                  << matriz[i][j].getDistProvincial() << " "
-                  << matriz[i][j].getDistRural()      << " ";
+            for (int j = 0; j < n; j++) {
+                f << matriz[i][j] << " ";
+            }
             f << endl;
         }
 
@@ -213,9 +152,7 @@ public:
 
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
-                int dn, dp, dr;
-                f >> dn >> dp >> dr;
-                matriz[i][j] = Conexion(dn, dp, dr);
+                f >> matriz[i][j];
             }
         }
 
@@ -247,7 +184,6 @@ public:
         for (int i = 0; i < n - 1; i++) {
             int minDist = INF, u = -1;
 
-            // encuentra nodo no visitado con menor distancia
             for (int j = 0; j < n; j++) {
                 if (!visitado[j] && dist[j] <= minDist) {
                     minDist = dist[j];
@@ -258,9 +194,8 @@ public:
             if (u == -1) break;
             visitado[u] = true;
 
-            // conexiones desde u
             for (int v = 0; v < n; v++) {
-                int peso = matriz[u][v].getMejorDistancia();
+                int peso = matriz[u][v];
                 if (!visitado[v] && peso != INF && dist[u] + peso < dist[v]) {
                     dist[v] = dist[u] + peso;
                     previo[v] = u;
@@ -273,23 +208,18 @@ public:
             return;
         }
 
-        // reconstruye camino desde destino a origen
         vector<int> camino;
-
         int v = destino;
         while (v != -1) {
             camino.push_back(v);
             v = previo[v];
         }
 
-        // formatea camino para mostrarlo
         string caminoStr = "";
         for (int i = camino.size() - 1; i >= 0; i--) {
             caminoStr += ciudades[camino[i]].getNombre();
             if (i != 0) {
-                int desde = camino[i];
-                int hasta = camino[i - 1];
-                caminoStr += " -[" + matriz[desde][hasta].getMejorTipo() + "]-> ";
+                caminoStr += " -> ";
             }
         }
 
@@ -300,23 +230,27 @@ public:
     }
 };
 
+
 int main() {
 
     Grafo g(0);
 
-    // g.agregarCiudad("Corrientes",  10,  10);
-    // g.agregarCiudad("Goya",        20, 50);
-    // g.agregarCiudad("Mercedes",    50, 30);
+    // Ciudades
+    // g.agregarCiudad("Corrientes_Capital", 10, 10); // ID 0
+    // g.agregarCiudad("Goya",               20, 50); // ID 1
+    // g.agregarCiudad("Mercedes",           50, 30); // ID 2
+    // g.agregarCiudad("Paso_de_los_Libres", 80, 60); // ID 3
+    // g.agregarCiudad("Sauce",              70, 80); // ID 4
 
-    // // Conexión A: Corrientes (0) <-> Goya (1)
-    // g.agregarConexion(0, 1, 225, "Nacional");
-    // g.agregarConexion(0, 1, 240, "Provincial");
-    // g.agregarConexion(0, 1, 260, "Rural");
-
-    // // Conexión B: Goya (1) <-> Mercedes (2)
-    // g.agregarConexion(1, 2, 146, "Nacional");
-    // g.agregarConexion(1, 2, 160, "Provincial");
-    // g.agregarConexion(1, 2, 180, "Rural");
+    // // Conexiones
+    // g.agregarConexion(1, 0, 225); // Goya <-> Corrientes Capital
+    // g.agregarConexion(0, 2, 245); // Corrientes Capital <-> Mercedes
+    // g.agregarConexion(0, 3, 370); // Corrientes Capital <-> Paso de los Libres
+    // g.agregarConexion(1, 2, 146); // Goya <-> Mercedes
+    // g.agregarConexion(1, 4, 171); // Goya <-> Sauce
+    // g.agregarConexion(2, 3, 127); // Mercedes <-> Paso de los Libres
+    // g.agregarConexion(2, 4, 161); // Mercedes <-> Sauce
+    // g.agregarConexion(3, 4, 267); // Paso de los Libres <-> Sauce
 
     int op;
 
@@ -358,17 +292,14 @@ int main() {
 
         case 4: {
             int a, b;
-            string tipo;
             g.mostrarCiudades();
-            cout << "Ingrese dos ciudades (ej: 0 2): ";
+            cout << "Ingrese dos ciudades a desconectar (ej: 0 2): ";
             cin >> a >> b;
             if (a < 0 || b < 0 || a >= g.getCantidad() || b >= g.getCantidad()) {
                 cout << "Indices invalidos\n";
                 break;
             }
-            cout << "Tipo de ruta a cortar (Nacional, Provincial, Rural): ";
-            cin >> tipo;
-            g.cortarRuta(a, b, tipo);
+            g.cortarRuta(a, b);
             cout << "Ruta cortada correctamente\n";
             break;
         }
@@ -384,7 +315,7 @@ int main() {
         case 7: {
             string nombre;
             int x, y;
-            cout << "Nombre de la ciudad: "; cin >> nombre;
+            cout << "Nombre de la ciudad (sin espacios): "; cin >> nombre;
             cout << "Coordenada X: ";        cin >> x;
             cout << "Coordenada Y: ";        cin >> y;
             g.agregarCiudad(nombre, x, y);
@@ -393,7 +324,6 @@ int main() {
 
         case 8: {
             int a, b, dist;
-            string tipo;
             g.mostrarCiudades();
             cout << "Ciudad origen: ";  cin >> a;
             cout << "Ciudad destino: "; cin >> b;
@@ -402,8 +332,7 @@ int main() {
                 break;
             }
             cout << "Distancia (km): "; cin >> dist;
-            cout << "Tipo (Nacional, Provincial, Rural): "; cin >> tipo;
-            g.agregarConexion(a, b, dist, tipo);
+            g.agregarConexion(a, b, dist);
             cout << "Conexion agregada correctamente\n";
             break;
         }
