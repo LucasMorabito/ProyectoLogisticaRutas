@@ -1,0 +1,234 @@
+//---------------------------------------------------------------------------
+#include <vcl.h>
+#pragma hdrstop
+#include "Unit1.h"
+#include "Grafo.h"
+
+// Instancia global del motor lógico.
+// Se inicializa en 0, ya que el tamaño crecerá dinámicamente o al cargar el archivo.
+Grafo g(0);
+
+//---------------------------------------------------------------------------
+#pragma package(smart_init)
+#pragma resource "*.dfm"
+TForm1 *Form1;
+
+//---------------------------------------------------------------------------
+__fastcall TForm1::TForm1(TComponent* Owner)
+	: TForm(Owner)
+{
+}
+
+//---------------------------------------------------------------------------
+// Función asistente para actualizar las listas desplegables de ciudades
+void actualizarCombos()
+{
+	// Limpiamos los elementos viejos para no duplicarlos
+	Form1->comboOrigen->Items->Clear();
+	Form1->comboDestino->Items->Clear();
+
+	// Recorremos el grafo y cargamos los nombres de las ciudades activas
+	for (int i = 0; i < g.getCantidad(); i++) {
+		Ciudad c = g.getCiudad(i);
+
+		// Solo mostramos en la lista las ciudades que no estén dadas de baja
+		if (c.getEstado()) {
+			Form1->comboOrigen->Items->Add(c.getNombre().c_str());
+			Form1->comboDestino->Items->Add(c.getNombre().c_str());
+		}
+	}
+
+	// Dejamos seleccionada la primera opción por defecto si hay elementos
+	if (Form1->comboOrigen->Items->Count > 0) {
+		Form1->comboOrigen->ItemIndex = 0;
+		Form1->comboDestino->ItemIndex = 0;
+	}
+}
+
+//---------------------------------------------------------------------------
+// Función para dibujar la matriz de adyacencia en el TStringGrid
+void actualizarGrillaMatriz()
+{
+	int cant = g.getCantidad();
+
+	// Configuramos el tamaño de la grilla (+1 para dejar lugar a los encabezados)
+	Form1->grillaMatriz->ColCount = cant + 1;
+	Form1->grillaMatriz->RowCount = cant + 1;
+
+	// Limpiamos la esquina superior izquierda
+	Form1->grillaMatriz->Cells[0][0] = "";
+
+	// Dibujamos los encabezados (Nombres de las ciudades en la fila 0 y columna 0)
+	for (int i = 0; i < cant; i++) {
+		Ciudad c = g.getCiudad(i);
+
+		// Acortamos el nombre si es muy largo para que entre en la celda
+		std::string nombre = c.getNombre().substr(0, 8);
+		if (!c.getEstado()) nombre += " (X)"; // Marcador visual si está dada de baja
+
+		Form1->grillaMatriz->Cells[i + 1][0] = nombre.c_str(); // Encabezado de Columna
+		Form1->grillaMatriz->Cells[0][i + 1] = nombre.c_str(); // Encabezado de Fila
+	}
+
+	// Dibujamos las distancias en el interior de la grilla
+	for (int fila = 0; fila < cant; fila++) {
+		for (int col = 0; col < cant; col++) {
+			int dist = g.getDistancia(fila, col);
+
+			if (dist == INF) {
+				Form1->grillaMatriz->Cells[col + 1][fila + 1] = "INF";
+			} else {
+				Form1->grillaMatriz->Cells[col + 1][fila + 1] = IntToStr(dist);
+			}
+		}
+	}
+}
+
+//---------------------------------------------------------------------------
+//---------------------------------------------------------------------------
+void __fastcall TForm1::FormCreate(TObject *Sender)
+{
+	// Intentamos cargar el estado anterior del grafo desde el archivo físico.
+	// Si el archivo no existe (retorna ERROR), inicializamos el sistema con un set de datos de prueba (Hardcode).
+	if (g.cargarArchivo().find("ERROR") != std::string::npos) {
+
+		// Nodos base (Ciudades)
+		g.agregarCiudad("Corrientes_Capital", 10, 10); // ID 0
+		g.agregarCiudad("Goya", 20, 50);               // ID 1
+		g.agregarCiudad("Mercedes", 50, 30);           // ID 2
+		g.agregarCiudad("Paso_de_los_Libres", 80, 60); // ID 3
+		g.agregarCiudad("Sauce", 70, 80);              // ID 4
+
+		// Aristas base (Rutas) con sus respectivas distancias y nombres
+		g.agregarConexion(1, 0, 225, "RN_12");
+		g.agregarConexion(0, 2, 245, "RN_12-RN_123");
+		g.agregarConexion(0, 3, 370, "RN_123-RN_14");
+		g.agregarConexion(1, 2, 146, "RP_24");
+		g.agregarConexion(1, 4, 171, "RP_23-RP_126");
+		g.agregarConexion(2, 3, 127, "RN_119-RN_14");
+		g.agregarConexion(2, 4, 161, "RN_119-RP_126");
+		g.agregarConexion(3, 4, 267, "RN_14-RP_126");
+	}
+
+	actualizarCombos();
+	actualizarGrillaMatriz();
+}
+
+//---------------------------------------------------------------------------
+// Botón 1: Mostrar listado de ciudades
+void __fastcall TForm1::Button1Click(TObject *Sender)
+{
+	memoSalida->Clear();
+	memoSalida->Lines->Add("--- CIUDADES ---");
+
+	// Recorremos el vector de ciudades y verificamos el estado (borrado lógico)
+	for (int i = 0; i < g.getCantidad(); i++) {
+		Ciudad c = g.getCiudad(i);
+		std::string info = std::to_string(c.getId()) + " - " + c.getNombre();
+
+		// Feedback visual si la ciudad fue inhabilitada temporalmente
+		if (!c.getEstado()) {
+			info += " (inhabilitada)";
+		}
+		memoSalida->Lines->Add(info.c_str());
+	}
+}
+
+//---------------------------------------------------------------------------
+// Botón 3: Calcular la ruta óptima usando el algoritmo de Dijkstra
+void __fastcall TForm1::Button3Click(TObject *Sender)
+{
+	memoSalida->Clear();
+
+	// Extracción de datos de la UI (Listas desplegables)
+	int origen = comboOrigen->ItemIndex;
+	int destino = comboDestino->ItemIndex;
+
+	// Validación de selección nula
+	if (origen == -1 || destino == -1) {
+		memoSalida->Lines->Add("Error: Seleccione un origen y destino válidos.");
+		return;
+	}
+
+	// Invocación del motor algorítmico
+	std::string resultado = g.dijkstra(origen, destino);
+	memoSalida->Lines->Add(resultado.c_str());
+}
+
+//---------------------------------------------------------------------------
+// Botón 4: Cortar Ruta (Desconexión temporal)
+void __fastcall TForm1::Button4Click(TObject *Sender)
+{
+	memoSalida->Clear();
+
+	int origen = comboOrigen->ItemIndex;
+	int destino = comboDestino->ItemIndex;
+
+	if (origen == -1 || destino == -1) {
+		memoSalida->Lines->Add("Error: Seleccione un origen y destino válidos.");
+		return;
+	}
+
+	// Ejecuta el borrado lógico de la arista en ambas direcciones
+	std::string resultado = g.cortarRuta(origen, destino);
+	memoSalida->Lines->Add(resultado.c_str());
+}
+
+//---------------------------------------------------------------------------
+// Botón 5: Persistencia manual de datos
+void __fastcall TForm1::Button5Click(TObject *Sender)
+{
+	memoSalida->Clear();
+
+	// Genera o sobrescribe el archivo grafo.txt con el estado actual de la memoria
+	std::string resultado = g.guardarArchivo();
+	memoSalida->Lines->Add(resultado.c_str());
+}
+
+//---------------------------------------------------------------------------
+// Botón 6: Alta de nueva ciudad
+void __fastcall TForm1::Button6Click(TObject *Sender)
+{
+	UnicodeString nombre = Edit3->Text;
+	int x = StrToInt(Edit4->Text);
+	int y = StrToInt(Edit5->Text);
+
+	// Conversión explícita: VCL UnicodeString -> VCL AnsiString -> std::string (C++ Estándar)
+	std::string nombreStd = AnsiString(nombre).c_str();
+	std::string resultado = g.agregarCiudad(nombreStd, x, y);
+
+	memoSalida->Lines->Add(resultado.c_str());
+
+	actualizarCombos();
+	actualizarGrillaMatriz();
+}
+
+//---------------------------------------------------------------------------
+// Botón 7: Alta de nueva conexión (Feedback en ventana emergente)
+void __fastcall TForm1::Button7Click(TObject *Sender)
+{
+	int origen = StrToInt(Edit3->Text);
+	int destino = StrToInt(Edit4->Text);
+	int distancia = StrToInt(Edit5->Text);
+
+	// Se inyecta un nombre de ruta por defecto al no existir un input específico en la UI
+	std::string resultado = g.agregarConexion(origen, destino, distancia, "Ruta_Nueva");
+
+	// Feedback mediante ventana modal
+	ShowMessage(resultado.c_str());
+}
+
+//---------------------------------------------------------------------------
+// Botón 8: Alta de nueva conexión (Feedback en el Memo)
+void __fastcall TForm1::Button8Click(TObject *Sender)
+{
+	int origen = StrToInt(Edit6->Text);
+	int destino = StrToInt(Edit7->Text);
+	int distancia = StrToInt(Edit8->Text);
+
+	std::string resultado = g.agregarConexion(origen, destino, distancia, "Ruta_Nueva");
+	memoSalida->Lines->Add(resultado.c_str());
+}
+
+//---------------------------------------------------------------------------
+

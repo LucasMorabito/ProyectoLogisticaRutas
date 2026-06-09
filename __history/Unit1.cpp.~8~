@@ -1,0 +1,141 @@
+//---------------------------------------------------------------------------
+
+#include <vcl.h>
+#pragma hdrstop
+#include "Unit1.h"
+#include "Grafo.h"
+Grafo g(0);
+
+
+
+//---------------------------------------------------------------------------
+#pragma package(smart_init)
+#pragma resource "*.dfm"
+TForm1 *Form1;
+//---------------------------------------------------------------------------
+__fastcall TForm1::TForm1(TComponent* Owner)
+	: TForm(Owner)
+{
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void __fastcall TForm1::FormCreate(TObject *Sender)
+{
+	// ===================== CIUDADES =====================
+	g.agregarCiudad("Corrientes_Capital", 10, 10); // ID 0
+	g.agregarCiudad("Goya", 20, 50);               // ID 1
+	g.agregarCiudad("Mercedes", 50, 30);           // ID 2
+	g.agregarCiudad("Paso_de_los_Libres", 80, 60); // ID 3
+	g.agregarCiudad("Sauce", 70, 80);              // ID 4
+
+	// ===================== CONEXIONES =====================
+	g.agregarConexion(1, 0, 225);
+	g.agregarConexion(0, 2, 245);
+	g.agregarConexion(0, 3, 370);
+	g.agregarConexion(1, 2, 146);
+	g.agregarConexion(1, 4, 171);
+	g.agregarConexion(2, 3, 127);
+	g.agregarConexion(2, 4, 161);
+	g.agregarConexion(3, 4, 267);
+}
+
+//---------------------------------------------------------------------------
+ void __fastcall TForm1::Button1Click(TObject *Sender)
+{
+	memoSalida->Clear();
+	memoSalida->Lines->Add(UnicodeString(g.mostrarCiudades().c_str()));
+}
+
+
+
+
+void __fastcall TForm1::Button2Click(TObject *Sender)
+{
+    memoSalida->Clear();
+    memoSalida->Lines->Add(UnicodeString(g.mostrarMatriz().c_str()));
+}
+//---------------------------------------------------------------------------
+void __fastcall TForm1::Button3Click(TObject *Sender)
+{
+    memoSalida->Clear();
+	int origen = StrToInt(Edit1->Text);   //
+	int destino = StrToInt(Edit2->Text);  //
+
+    // ejemplo: mostrar ruta con Dijkstra
+    memoSalida->Lines->Add(
+        UnicodeString(g.dijkstra(origen, destino).c_str())
+    );
+}
+
+//---------------------------------------------------------------------------
+void __fastcall TForm1::Button4Click(TObject *Sender)
+{
+	int origen = StrToInt(Edit1->Text);
+	int destino = StrToInt(Edit2->Text);
+    g.cortarRuta(origen, destino);
+    memoSalida->Lines->Add("Ruta cortada entre " + UnicodeString(origen) + " y " + UnicodeString(destino));
+}
+
+//---------------------------------------------------------------------------
+void __fastcall TForm1::Button5Click(TObject *Sender)
+{
+    ofstream archivo("grafo.txt");
+    archivo << g.mostrarCiudades();
+    archivo << g.mostrarMatriz();
+    archivo.close();
+    memoSalida->Lines->Add("Grafo guardado en grafo.txt");
+}
+
+//---------------------------------------------------------------------------
+// Botón 6: Agregar ciudad usando Edit3, Edit4 y Edit5
+void __fastcall TForm1::Button6Click(TObject *Sender)
+{
+	UnicodeString nombre = Edit3->Text;     // nombre de la ciudad
+	int x = StrToInt(Edit4->Text);          // coordenada X
+	int y = StrToInt(Edit5->Text);          // coordenada Y
+
+	// convertir UnicodeString -> AnsiString -> std::string
+	std::string nombreStd = AnsiString(nombre).c_str();
+
+	// agregar ciudad al grafo
+	g.agregarCiudad(nombreStd, x, y);
+
+	// mostrar confirmación en el memo
+	memoSalida->Lines->Add("Ciudad agregada: " + nombre +
+						   " (" + Edit4->Text + "," + Edit5->Text + ")");
+}
+
+//---------------------------------------------------------------------------
+void __fastcall TForm1::Button7Click(TObject *Sender)
+{
+	int origen = StrToInt(Edit3->Text);     //
+	int destino = StrToInt(Edit4->Text);    //
+	int distancia = StrToInt(Edit5->Text);  //
+
+	g.agregarConexion(origen, destino, distancia);
+
+	ShowMessage("Conexión agregada entre " +
+				Edit3->Text + " y " + Edit4->Text +
+				" con distancia " + Edit5->Text);
+}
+
+//---------------------------------------------------------------------------
+
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::Button8Click(TObject *Sender)
+{
+	int origen = StrToInt(Edit6->Text);     //
+	int destino = StrToInt(Edit7->Text);    //
+	int distancia = StrToInt(Edit8->Text);  //
+
+    g.agregarConexion(origen, destino, distancia);
+
+    memoSalida->Lines->Add("Conexión agregada entre " +
+						   Edit6->Text + " y " + Edit7->Text +
+						   " con distancia " + Edit8->Text);
+}
+
+

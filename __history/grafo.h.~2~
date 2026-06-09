@@ -1,0 +1,138 @@
+#ifndef GrafoH
+#define GrafoH
+
+#include <iostream>
+#include <vector>
+#include <fstream>
+#include <ctime>
+using namespace std;
+
+const int INF = 999999;
+
+// ===================== CLASE CIUDAD =====================
+class Ciudad {
+private:
+    int id;
+    string nombre;
+    int x, y;
+
+public:
+    Ciudad(int id = 0, string nombre = "", int x = 0, int y = 0) {
+        this->id = id;
+        this->nombre = nombre;
+        this->x = x;
+        this->y = y;
+    }
+
+    int getId() const { return id; }
+    string getNombre() const { return nombre; }
+    int getX() const { return x; }
+    int getY() const { return y; }
+
+    void setId(int id) { this->id = id; }
+    void setNombre(string nombre) { this->nombre = nombre; }
+    void setX(int x) { this->x = x; }
+    void setY(int y) { this->y = y; }
+
+    string imprimir() const {
+        return to_string(id) + " - " + nombre;
+    }
+};
+
+// ===================== CLASE GRAFO =====================
+class Grafo {
+private:
+    vector<Ciudad> ciudades;
+    vector<vector<int>> matriz;
+
+public:
+    Grafo(int n = 0) { inicializar(n); }
+
+    void inicializar(int n) {
+        matriz.assign(n, vector<int>(n, INF));
+        for (int i = 0; i < n; i++) matriz[i][i] = 0;
+    }
+
+    int getCantidad() const { return ciudades.size(); }
+
+    void agregarCiudad(string nombre, int x, int y) {
+        int nuevoId = getCantidad();
+        ciudades.push_back(Ciudad(nuevoId, nombre, x, y));
+        int n = getCantidad();
+        for (int i = 0; i < n - 1; i++) matriz[i].push_back(INF);
+        vector<int> nuevaFila(n, INF);
+        nuevaFila[n - 1] = 0;
+        matriz.push_back(nuevaFila);
+    }
+
+    void agregarConexion(int i, int j, int distancia) {
+        matriz[i][j] = distancia;
+        matriz[j][i] = distancia;
+    }
+
+    void cortarRuta(int i, int j) {
+        matriz[i][j] = INF;
+        matriz[j][i] = INF;
+    }
+
+    string mostrarCiudades() {
+        string out = "\n--- CIUDADES ---\n";
+        for (int i = 0; i < getCantidad(); i++)
+            out += ciudades[i].imprimir() + "\n";
+        return out;
+    }
+
+    string mostrarMatriz() {
+        string out = "\n--- MATRIZ ---\n";
+        for (int i = 0; i < getCantidad(); i++) {
+            for (int j = 0; j < getCantidad(); j++) {
+                if (matriz[i][j] == INF) out += "INF\t";
+                else out += to_string(matriz[i][j]) + "\t";
+            }
+            out += "\n";
+        }
+        return out;
+    }
+
+    string dijkstra(int origen, int destino) {
+        int n = getCantidad();
+        vector<int> dist(n, INF);
+        vector<bool> visitado(n, false);
+        vector<int> previo(n, -1);
+        dist[origen] = 0;
+
+        for (int i = 0; i < n - 1; i++) {
+            int minDist = INF, u = -1;
+            for (int j = 0; j < n; j++) {
+                if (!visitado[j] && dist[j] <= minDist) {
+                    minDist = dist[j]; u = j;
+                }
+            }
+            if (u == -1) break;
+            visitado[u] = true;
+            for (int v = 0; v < n; v++) {
+                int peso = matriz[u][v];
+                if (!visitado[v] && peso != INF && dist[u] + peso < dist[v]) {
+                    dist[v] = dist[u] + peso;
+                    previo[v] = u;
+                }
+            }
+        }
+
+        if (dist[destino] == INF) return "No hay ruta disponible";
+
+        vector<int> camino;
+        int v = destino;
+        while (v != -1) { camino.push_back(v); v = previo[v]; }
+
+        string caminoStr = "";
+        for (int i = camino.size() - 1; i >= 0; i--) {
+            caminoStr += ciudades[camino[i]].getNombre();
+            if (i != 0) caminoStr += " -> ";
+        }
+
+        return "Distancia mínima: " + to_string(dist[destino]) + " km\nCamino: " + caminoStr;
+    }
+};
+
+#endif

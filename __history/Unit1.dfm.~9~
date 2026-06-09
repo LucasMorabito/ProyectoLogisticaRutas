@@ -1,0 +1,174 @@
+object Form1: TForm1
+  Left = 0
+  Top = 0
+  Caption = 'Form1'
+  ClientHeight = 728
+  ClientWidth = 1027
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -12
+  Font.Name = 'Segoe UI'
+  Font.Style = []
+  OnCreate = FormCreate
+  TextHeight = 15
+  object Button1: TButton
+    Left = 272
+    Top = 152
+    Width = 75
+    Height = 25
+    Caption = 'Ver ciudades'
+    TabOrder = 0
+    OnClick = Button1Click
+  end
+  object Button3: TButton
+    Left = 224
+    Top = 208
+    Width = 75
+    Height = 25
+    Caption = 'Calcular ruta'
+    TabOrder = 1
+    OnClick = Button3Click
+  end
+  object memoSalida: TMemo
+    Left = 562
+    Top = 456
+    Width = 327
+    Height = 177
+    Lines.Strings = (
+      'memoSalida')
+    TabOrder = 2
+  end
+  object Button4: TButton
+    Left = 318
+    Top = 208
+    Width = 75
+    Height = 25
+    Caption = 'Cortar ruta'
+    TabOrder = 3
+    OnClick = Button4Click
+  end
+  object Button5: TButton
+    Left = 496
+    Top = 152
+    Width = 75
+    Height = 25
+    Caption = 'Guardar'
+    TabOrder = 4
+    OnClick = Button5Click
+  end
+  object Button6: TButton
+    Left = 496
+    Top = 208
+    Width = 75
+    Height = 25
+    Caption = 'Cargar'
+    TabOrder = 5
+    OnClick = Button6Click
+  end
+  object Button7: TButton
+    Left = 464
+    Top = 264
+    Width = 137
+    Height = 25
+    Caption = 'Agregar ciudad'
+    TabOrder = 6
+    OnClick = Button7Click
+  end
+  object Button8: TButton
+    Left = 704
+    Top = 152
+    Width = 121
+    Height = 25
+    Caption = 'Agregar conexi'#243'n'
+    TabOrder = 7
+    OnClick = Button8Click
+  end
+  object GroupBox1: TGroupBox
+    Left = 432
+    Top = 295
+    Width = 201
+    Height = 123
+    Caption = 'Ciudades'
+    TabOrder = 8
+    object Edit4: TEdit
+      Left = 40
+      Top = 55
+      Width = 121
+      Height = 23
+      TabOrder = 0
+      Text = 'Coordenada X'
+    end
+    object Edit5: TEdit
+      Left = 40
+      Top = 84
+      Width = 121
+      Height = 23
+      TabOrder = 1
+      Text = 'Coordenada Y'
+    end
+    object Edit3: TEdit
+      Left = 40
+      Top = 26
+      Width = 121
+      Height = 23
+      TabOrder = 2
+      Text = 'Nombre'
+    end
+  end
+  object comboOrigen: TComboBox
+    Left = 240
+    Top = 254
+    Width = 145
+    Height = 23
+    TabOrder = 9
+    Text = 'Origen'
+  end
+  object grillaMatriz: TStringGrid
+    Left = 176
+    Top = 456
+    Width = 329
+    Height = 177
+    TabOrder = 10
+  end
+  object GroupBox2: TGroupBox
+    Left = 663
+    Top = 183
+    Width = 201
+    Height = 123
+    Caption = 'Conexiones'
+    TabOrder = 11
+    object Edit6: TEdit
+      Left = 40
+      Top = 26
+      Width = 121
+      Height = 23
+      TabOrder = 0
+      Text = 'ID Ciudad 1'
+    end
+    object Edit7: TEdit
+      Left = 40
+      Top = 55
+      Width = 121
+      Height = 23
+      TabOrder = 1
+      Text = 'ID Ciudad 2'
+    end
+    object Edit8: TEdit
+      Left = 40
+      Top = 84
+      Width = 121
+      Height = 23
+      TabOrder = 2
+      Text = 'Distancia (km)'
+    end
+  end
+  object comboDestino: TComboBox
+    Left = 240
+    Top = 283
+    Width = 145
+    Height = 23
+    TabOrder = 12
+    Text = 'Destino'
+  end
+end

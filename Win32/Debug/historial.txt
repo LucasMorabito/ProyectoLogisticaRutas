@@ -1,0 +1,5 @@
+[Tue Jun  9 01:03:47 2026] Goya -> (RP_24) -> Mercedes | 146 km
+[Tue Jun  9 01:03:51 2026] Goya -> (RP_23-RP_126) -> Sauce -> (RN_119-RP_126) -> Mercedes | 332 km
+[Tue Jun  9 02:08:06 2026] Goya -> (RP_24) -> Mercedes -> (RN_119-RN_14) -> Paso_de_los_Libres | 273 km
+[Tue Jun  9 02:10:38 2026] Corrientes_Capital -> (RN_12) -> Goya -> (RP_23-RP_126) -> Sauce | 396 km
+[Tue Jun  9 02:10:58 2026] Corrientes_Capital -> (RN_12) -> Goya -> (RP_24) -> Mercedes | 371 km
